@@ -116,59 +116,57 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return that.setScriptAndReloadWithHalyard(result, halyard, true);
 	      });
 	    },
-	    appendToScriptAndReloadWithHalyard: function appendToScriptAndReloadWithHalyard(appName, halyard, doSaveAfterReload) {
+	    appendToScriptAndReloadWithHalyard: function appendToScriptAndReloadWithHalyard(app, halyard, doSaveAfterReload) {
 	      var that = this;
 	      var deferredConnections = [];
 	
-	      return that.openDoc(appName).then(function (app) {
-	        halyard.getConnections().forEach(function (connection) {
-	          var qixConnectionObject = connection.getQixConnectionObject();
-	          if (qixConnectionObject) {
-	            var connectionPromise = app.createConnection(qixConnectionObject).then(function (result) {
-	              return result;
-	            }, function (err) {
-	              var LOCERR_CONNECTION_ALREADY_EXISTS = 2000;
+	      halyard.getConnections().forEach(function (connection) {
+	        var qixConnectionObject = connection.getQixConnectionObject();
+	        if (qixConnectionObject) {
+	          var connectionPromise = app.createConnection(qixConnectionObject).then(function (result) {
+	            return result;
+	          }, function (err) {
+	            var LOCERR_CONNECTION_ALREADY_EXISTS = 2000;
 	
-	              // Will not throw error if connection already exists.
-	              // The connections guid makes the connections unique and we assumes that it
-	              // is the same that was previously created
-	              if (!(err.code && err.code === LOCERR_CONNECTION_ALREADY_EXISTS)) {
-	                throw createErrorMessage(CONNECTION_ERROR, err, connection);
-	              }
-	            });
+	            // Will not throw error if connection already exists.
+	            // The connections guid makes the connections unique and we assumes that it
+	            // is the same that was previously created
+	            if (!(err.code && err.code === LOCERR_CONNECTION_ALREADY_EXISTS)) {
+	              throw createErrorMessage(CONNECTION_ERROR, err, connection);
+	            }
+	          });
 	
-	            deferredConnections.push(connectionPromise);
-	          }
-	        });
+	          deferredConnections.push(connectionPromise);
+	        }
+	      });
 	
-	        return app.getScript().then(function (currentScript) {
-	          var newScript = halyard.getScript();
-	          return that.Promise.all(deferredConnections).then(function () {
-	            return app.getLocaleInfo().then(function (localeInfoResult) {
-	              halyard.setDefaultSetStatements((0, _utils2.default)(localeInfoResult), true);
-	              return app.globalApi.configureReload(true, true, false).then(function () {
-	                return app.setScript(currentScript + '\n' + newScript).then(function () {
-	                  return app.doReload().then(function () {
-	                    return app.globalApi.getProgress(0).then(function (progressResult) {
-	                      if (progressResult.qErrorData.length !== 0) {
-	                        return app.checkScriptSyntax().then(function (syntaxCheckData) {
-	                          if (syntaxCheckData.length === 0) {
-	                            throw createErrorMessage(LOADING_ERROR, progressResult.qErrorData[0]);
-	                          } else {
-	                            var item = halyard.getItemThatGeneratedScriptAt(syntaxCheckData[0].qTextPos);
-	                            throw createErrorMessage(SYNTAX_ERROR, progressResult.qErrorData[0], item);
-	                          }
-	                        });
-	                      }
+	      return app.getScript().then(function (currentScript) {
+	        var newScript = halyard.getScript();
+	        return that.Promise.all(deferredConnections).then(function () {
+	          return app.getLocaleInfo().then(function (localeInfoResult) {
+	            halyard.setDefaultSetStatements((0, _utils2.default)(localeInfoResult), true);
+	            return app.globalApi.configureReload(true, true, false).then(function () {
+	              return app.setScript(currentScript + '\n' + newScript).then(function () {
+	                return app.doReload().then(function () {
+	                  return app.globalApi.getProgress(0).then(function (progressResult) {
+	                    if (progressResult.qErrorData.length !== 0) {
+	                      return app.checkScriptSyntax().then(function (syntaxCheckData) {
+	                        if (syntaxCheckData.length === 0) {
+	                          throw createErrorMessage(LOADING_ERROR, progressResult.qErrorData[0]);
+	                        } else {
+	                          var item = halyard.getItemThatGeneratedScriptAt(syntaxCheckData[0].qTextPos);
+	                          throw createErrorMessage(SYNTAX_ERROR, progressResult.qErrorData[0], item);
+	                        }
+	                      });
+	                    }
 	
-	                      if (doSaveAfterReload) {
-	                        return app.doSave().then(function () {
-	                          return app;
-	                        });
-	                      }
+	                    if (doSaveAfterReload) {
+	                      return app.doSave().then(function () {
+	                        return app;
+	                      });
+	                    }
 	
-	                      return app;
-	                    });
+	                    return app;
 	                  });
 	                });
 	              });
