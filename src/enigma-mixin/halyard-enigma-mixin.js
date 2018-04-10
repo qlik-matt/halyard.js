@@ -81,7 +81,7 @@ const halyardMixin = {
           app.getLocaleInfo().then((localeInfoResult) => {
             halyard.setDefaultSetStatements(convertQixGetLocalInfo(localeInfoResult), true);
             return app.globalApi.configureReload(true, true, false).then(
-              () => app.setScript(`${currentScript}\n${newScript}`).then(
+              () => app.setScript(`${newScript}\n${currentScript}`).then(
                 () => app.doReload().then(() => app.globalApi.getProgress(0).then(
                   (progressResult) => {
                     if (progressResult.qErrorData.length !== 0) {
