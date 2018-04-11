@@ -146,7 +146,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          return app.getLocaleInfo().then(function (localeInfoResult) {
 	            halyard.setDefaultSetStatements((0, _utils2.default)(localeInfoResult), true);
 	            return app.globalApi.configureReload(true, true, false).then(function () {
-	              return app.setScript(currentScript + '\n' + newScript).then(function () {
+	              return app.setScript(currentScript.replace("///$tab SSE", "\n" + newScript + "\n///$tab SSE")).then(function () {
 	                return app.doReload().then(function () {
 	                  return app.globalApi.getProgress(0).then(function (progressResult) {
 	                    if (progressResult.qErrorData.length !== 0) {
